@@ -8,6 +8,7 @@ function useNetworkState() {
         const setOffline = () => setNetwork('offline');
 
         if (!('onLine' in navigator)) {
+            setNetwork('unknown');
             return;
         }
 

@@ -116,13 +116,25 @@ function App() {
             <div>Geolocation API: {!isGeolocationAPI && 'un'}available</div>
             <div>Geolocation Permission: {permission}</div>
 
-            <ol>{geoStates.current.map((geoState, i) => (
-                <li key={i}>Started: {geoState.startedAt.toLocaleTimeString()}; Finished: {geoState.finishedAt?.toLocaleTimeString() || 'not yet'};
-                    Options: {print(printOptions(geoState.options))}
-                    {geoState.error && (<>Error: {print(printError(geoState.error))}</>)}
-                    {geoState.position && (<>Position:  {print(printPosition(geoState.position))}</>)}
-                </li>
-            ))}</ol>
+            <ol className="list">{geoStates.current.map((geoState, i) => {
+                const isFinished = geoState.finishedAt !== undefined;
+                const stateName = isFinished ? 'finished' : 'progress';
+                const key = `${i}_${stateName}`;
+                const finishedIn = geoState.finishedAt ? geoState.finishedAt.getTime() - geoState.startedAt.getTime() :
+                    undefined;
+
+                return (
+                    <li key={key} className={`${stateName}`}>
+                        Started: {geoState.startedAt.toLocaleTimeString()};
+                        Finished: {geoState.finishedAt?.toLocaleTimeString() || 'not yet'}
+                        {finishedIn !== undefined && ` in ${finishedIn}ms`};
+                        Options: {print(printOptions(geoState.options))}
+                        {geoState.error && (<>Error: {print(printError(geoState.error))}</>)}
+                        {geoState.position && (<>Position:  {print(printPosition(geoState.position))}</>)}
+                    </li>
+                );
+            })
+            }</ol>
 
             <button onClick={getCurrentPosition}>getCurrentPosition</button>
         </div>

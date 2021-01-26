@@ -1,11 +1,36 @@
 .App {
     position: relative;
 
-    padding-top: 40px;
+    padding-top: 3rem;
 }
 
 .fix {
     position: fixed;
 
     top: 0;
+}
+
+.progress {
+    background-color: rgba(233, 187, 20, .2);
+}
+
+.list {
+    padding-left: 1.25rem;
+}
+
+@media screen and (max-width: 370px) {
+    .geo-form {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .App {
+        padding-top: 4rem;
+    }
+}
+
+@media screen and (min-width: 690px) {
+    .App {
+        padding-top: 1.25rem;
+    }
 }

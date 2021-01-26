@@ -1,4 +1,7 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
+
+import useNetworkState from './hooks/useNetworkState';
+import useGeoPermissions from './hooks/useGeoPermissions';
 
 import GeoForm, { GetValues } from './components/geo-form/geo-form';
 
@@ -6,9 +9,11 @@ import './App.css';
 
 function App() {
     const [isGeolocationAPI] = useState('geolocation' in navigator);
-    const [permission, setPermission] = useState<PermissionState | string>('resolving...');
     const [, rerender] = useState(0);
     const readFormValuesRef = useRef<GetValues>(() => ({}));
+    const { network } = useNetworkState();
+    const { permission } = useGeoPermissions();
+    const userAgent = useMemo(() => navigator.userAgent, []);
 
     type GeoLocationState = {
         startedAt: Date,
@@ -19,35 +24,6 @@ function App() {
     };
 
     const geoStates = useRef<GeoLocationState[]>([]);
-
-    useEffect(() => {
-        let permissionStatus: PermissionStatus;
-        const permissionListener = function() {
-            setPermission(permissionStatus.state);
-        };
-
-        if ('permissions' in navigator) {
-            navigator.permissions
-                .query({
-                    name: 'geolocation'
-                })
-                .then(function(status) {
-                    permissionStatus = status;
-                    setPermission(permissionStatus.state);
-                    permissionStatus.addEventListener('change', permissionListener);
-                });
-        } else {
-            setPermission('permissions API unavailable');
-        }
-
-        return () => {
-            if (!permissionStatus) {
-                return;
-            }
-
-            permissionStatus.removeEventListener('change', permissionListener);
-        };
-    }, []);
 
     const geolocationSuccess = useCallback((state: GeoLocationState, position: GeolocationPosition) => {
         state.finishedAt = new Date();
@@ -113,8 +89,10 @@ function App() {
         <div className="App">
             <GeoForm getValues={readFormValuesRef} className="fix" />
 
+            <div>UserAgent: {userAgent}</div>
             <div>Geolocation API: {!isGeolocationAPI && 'un'}available</div>
             <div>Geolocation Permission: {permission}</div>
+            <div>Network state: {network}</div>
 
             <ol className="list">{geoStates.current.map((geoState, i) => {
                 const isFinished = geoState.finishedAt !== undefined;
